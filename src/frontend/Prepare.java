@@ -2,6 +2,8 @@ package frontend;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.*;
+import java.net.Socket;
 import java.util.HashMap;
 
 public class Prepare extends JFrame {
@@ -64,7 +66,27 @@ public class Prepare extends JFrame {
     SwingUtilities.invokeLater(Prepare::new);
   }
 
-  private void connectToServer() {}
+  private void connectToServer() {
+    if (positions.size() == SHIPS.length) {
+      final int[][][] shipPositions = new int[SHIPS.length][][];
+      for (int i = 0; i < SHIPS.length; i++) shipPositions[i] = positions.get(SHIPS[i]);
+
+      try (Socket socket = new Socket("localhost", 5000);
+          BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+          ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+        out.writeObject(shipPositions);
+
+        int response = Integer.parseInt(in.readLine());
+        if (response == 0 || response == 1) {
+          this.dispose();
+          new Game(shipPositions, response);
+        } else JOptionPane.showMessageDialog(this, "Unexpected response from server: " + response);
+      } catch (IOException e) {
+        JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
+      }
+
+    } else JOptionPane.showMessageDialog(this, "Place all ships before confirming!");
+  }
 
   private void cellClicked(final int row, final int col) {
     final Ship ship = SHIPS[shipSelector.getSelectedIndex()];
