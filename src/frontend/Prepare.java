@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class Prepare extends JFrame {
-  private static final int SIZE = 4; // Should be 10 for production
+  public static final int SIZE = 4; // Should be 10 for production
   private static final Ship[] SHIPS = {
     new Ship("Ship A", 2), new Ship("Ship B", 2), new Ship("Ship C", 3)
   };
@@ -79,12 +79,11 @@ public class Prepare extends JFrame {
         int response = Integer.parseInt(in.readLine());
         if (response == 0 || response == 1) {
           this.dispose();
-          new Game(shipPositions, response);
+          SwingUtilities.invokeLater(() -> new Game(shipPositions, socket));
         } else JOptionPane.showMessageDialog(this, "Unexpected response from server: " + response);
       } catch (IOException e) {
         JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
       }
-
     } else JOptionPane.showMessageDialog(this, "Place all ships before confirming!");
   }
 
