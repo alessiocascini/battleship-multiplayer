@@ -20,7 +20,7 @@ public class Server {
 
       while (true) {
         Socket clientSocket = serverSocket.accept();
-        new Thread(new GameHandler(clientSocket)).start();
+        new GameHandler(clientSocket);
       }
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();
