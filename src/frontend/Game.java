@@ -59,7 +59,6 @@ public class Game extends JFrame {
   }
 
   private void cellClicked(int row, int col) {
-
     try (Socket socket = new Socket("localhost", 5000);
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
@@ -69,8 +68,25 @@ public class Game extends JFrame {
 
       if (isYourTurn) {
         out.writeObject(new int[] {row, col});
-        String result = (String) in.readObject();
-        JOptionPane.showMessageDialog(this, "Result of your attack: " + result);
+        int[][] result = (int[][]) in.readObject();
+
+        switch (result.length) {
+          case 0 -> {
+            JOptionPane.showMessageDialog(this, "Miss!");
+            opponentPanel.getComponent(row * SIZE + col).setBackground(Color.BLUE);
+          }
+          case 1 -> {
+            JOptionPane.showMessageDialog(this, "Hit!");
+            opponentPanel.getComponent(row * SIZE + col).setBackground(Color.RED);
+          }
+          default -> {
+            JOptionPane.showMessageDialog(this, "You sunk a ship!");
+            for (int[] pos : result)
+              opponentPanel.getComponent(pos[0] * SIZE + pos[1]).setBackground(Color.BLACK);
+          }
+        }
+
+        opponentPanel.getComponent(row * SIZE + col).setEnabled(false);
       } else JOptionPane.showMessageDialog(this, "It's not your turn!");
     } catch (Exception e) {
       e.printStackTrace();
