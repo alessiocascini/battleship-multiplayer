@@ -5,8 +5,12 @@ import java.net.*;
 import java.util.ArrayList;
 
 public class Server {
-  public static final ArrayList<Ship>[] ships = new ArrayList[2]; // set to private after testing
+  public static final ArrayList<Ship>[] ships = new ArrayList[2];
+  public static final int[] sunkenShipsCount = {0, 0};
   private static final int[][][][] shipPositions = new int[2][][][];
+  public static int[] lastMove = null;
+  public static int[][] lastResult = null;
+  public static boolean isFirstTurn = true;
   private static boolean isPlayerOneTurn = true;
 
   public static void main(String[] args) {
@@ -54,7 +58,7 @@ public class Server {
   }
 
   public static void passTurn() {
-    Server.isPlayerOneTurn = !isPlayerOneTurn;
+    isPlayerOneTurn = !isPlayerOneTurn;
   }
 
   public static class Ship {

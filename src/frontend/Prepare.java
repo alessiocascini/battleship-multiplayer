@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class Prepare extends JFrame {
   public static final int SIZE = 4; // Should be 10 for production
   private static final Ship[] SHIPS = {
-    new Ship("Ship A", 2), new Ship("Ship B", 2), new Ship("Ship C", 3)
+    new Ship("Ship A", 2), //new Ship("Ship B", 2), new Ship("Ship C", 3)
   };
 
   private final JPanel gridPanel;

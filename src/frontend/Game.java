@@ -11,13 +11,12 @@ public class Game extends JFrame {
   private final JPanel playerPanel = new JPanel(new GridLayout(SIZE, SIZE));
   private final JPanel opponentPanel = new JPanel(new GridLayout(SIZE, SIZE));
 
-  private final int[][][] shipPositions;
   private final boolean isFirstPlayer;
+  private boolean isFirstTurn = true;
 
   public Game(int[][][] shipPositions, boolean isFirstPlayer) {
     super("Game Started");
 
-    this.shipPositions = shipPositions;
     this.isFirstPlayer = isFirstPlayer;
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,7 +27,7 @@ public class Game extends JFrame {
       final JButton button = new JButton();
       final int row = i / SIZE;
       final int col = i % SIZE;
-      button.addActionListener(_ -> cellClicked(row, col));
+      button.addActionListener(_ -> new Thread(() -> cellClicked(row, col)).start());
       opponentPanel.add(button);
     }
 
@@ -67,32 +66,75 @@ public class Game extends JFrame {
       boolean isYourTurn = (Boolean) in.readObject();
 
       if (isYourTurn) {
+        if (isFirstTurn && !isFirstPlayer) {
+          processOpponentMove(in);
+          isFirstTurn = false;
+        }
+
         out.writeObject(new int[] {row, col});
         int[][] result = (int[][]) in.readObject();
 
-        switch (result.length) {
-          case 0 -> {
-            JOptionPane.showMessageDialog(this, "Miss!");
-            opponentPanel.getComponent(row * SIZE + col).setBackground(Color.BLUE);
-          }
-          case 1 -> {
-            JOptionPane.showMessageDialog(this, "Hit!");
-            opponentPanel.getComponent(row * SIZE + col).setBackground(Color.RED);
-          }
-          default -> {
-            JOptionPane.showMessageDialog(this, "You sunk a ship!");
-            for (int[] pos : result)
-              opponentPanel.getComponent(pos[0] * SIZE + pos[1]).setBackground(Color.BLACK);
-          }
-        }
+        SwingUtilities.invokeLater(
+            () -> {
+              switch (result.length) {
+                case 0 -> {
+                  JOptionPane.showMessageDialog(this, "Miss!");
+                  opponentPanel.getComponent(row * SIZE + col).setBackground(Color.BLUE);
+                }
+                case 1 -> {
+                  JOptionPane.showMessageDialog(this, "Hit!");
+                  opponentPanel.getComponent(row * SIZE + col).setBackground(Color.RED);
+                }
+                default -> {
+                  JOptionPane.showMessageDialog(this, "You sunk a ship!");
+                  for (int[] pos : result)
+                    if (!(pos[0] == -1 && pos[1] == -1))
+                      opponentPanel.getComponent(pos[0] * SIZE + pos[1]).setBackground(Color.BLACK);
 
-        opponentPanel.getComponent(row * SIZE + col).setEnabled(false);
+                  if (result[0][0] == -1 && result[0][1] == -1) {
+                    JOptionPane.showMessageDialog(this, "You win!");
+                    for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
+                  }
+                }
+              }
 
-        String waitMsg = (String) in.readObject();
-        System.out.println("Received from server: " + waitMsg);
+              opponentPanel.getComponent(row * SIZE + col).setEnabled(false);
+            });
+
+        processOpponentMove(in);
       } else JOptionPane.showMessageDialog(this, "It's not your turn!");
     } catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  void processOpponentMove(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    int[] opponentMove = (int[]) in.readObject();
+    int[][] opponentResult = (int[][]) in.readObject();
+
+    switch (opponentResult.length) {
+      case 0 -> {
+        JOptionPane.showMessageDialog(
+            this, "Opponent missed at (" + opponentMove[0] + ", " + opponentMove[1] + ")!");
+        playerPanel
+            .getComponent(opponentMove[0] * SIZE + opponentMove[1])
+            .setBackground(Color.BLUE);
+      }
+      case 1 -> {
+        JOptionPane.showMessageDialog(
+            this, "Opponent hit your ship at (" + opponentMove[0] + ", " + opponentMove[1] + ")!");
+        playerPanel.getComponent(opponentMove[0] * SIZE + opponentMove[1]).setBackground(Color.RED);
+      }
+      default -> {
+        JOptionPane.showMessageDialog(this, "Opponent sunk your ship!");
+        for (int[] pos : opponentResult)
+          playerPanel.getComponent(pos[0] * SIZE + pos[1]).setBackground(Color.BLACK);
+
+        if (opponentMove[0] == -1 && opponentMove[1] == -1) {
+          JOptionPane.showMessageDialog(this, "You lose!");
+          for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
+        }
+      }
     }
   }
 }

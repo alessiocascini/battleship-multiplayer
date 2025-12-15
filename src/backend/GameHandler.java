@@ -48,12 +48,37 @@ public class GameHandler implements Runnable {
       if (isPlayerOne == Server.isPlayerOneTurn()) {
         out.writeObject(true);
 
+        if (!isPlayerOne && Server.isFirstTurn) {
+          out.writeObject(Server.lastMove);
+          out.writeObject(Server.lastResult);
+
+          Server.isFirstTurn = false;
+        }
+
         final int[] move = (int[]) in.readObject();
-        out.writeObject(processMove(move));
+        final int[][] result = processMove(move);
+
+        if (result.length > 1) Server.sunkenShipsCount[Server.isPlayerOneTurn() ? 1 : 0]++;
+
+        if (Server.sunkenShipsCount[isPlayerOne ? 1 : 0]
+            == Server.ships[isPlayerOne ? 1 : 0].size()) {
+          final int[][] winMessage = new int[result.length + 1][2];
+          winMessage[0] = new int[] {-1, -1};
+          System.arraycopy(result, 0, winMessage, 1, result.length);
+          out.writeObject(winMessage);
+        } else out.writeObject(result);
+
+        Server.lastMove = move;
+        Server.lastResult = result;
+
         Server.passTurn();
 
-        while (isPlayerOne == Server.isPlayerOneTurn()) Thread.sleep(100);
-        out.writeObject("Your turn");
+        while (isPlayerOne != Server.isPlayerOneTurn()) Thread.sleep(100);
+        if (Server.sunkenShipsCount[isPlayerOne ? 0 : 1]
+            == Server.ships[isPlayerOne ? 0 : 1].size()) out.writeObject(new int[] {-1, -1});
+        else out.writeObject(Server.lastMove);
+        out.writeObject(Server.lastResult);
+
       } else out.writeObject(false);
     } catch (Exception e) {
       e.printStackTrace();
