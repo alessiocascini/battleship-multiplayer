@@ -33,7 +33,7 @@ public class Server {
 
       while (true) {
         Socket clientSocket = serverSocket.accept();
-        new GameHandler(clientSocket);
+        new Thread(new GameHandler(clientSocket)).start();
       }
     } catch (IOException | InterruptedException e) {
       e.printStackTrace();

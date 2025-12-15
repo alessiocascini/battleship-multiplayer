@@ -1,28 +1,14 @@
 package backend;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 
-public class GameHandler {
+public class GameHandler implements Runnable {
+  private final Socket clientSocket;
+
   public GameHandler(final Socket clientSocket) {
-    try (Socket socket = clientSocket;
-        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-
-      final boolean isPlayerOne = (Boolean) in.readObject();
-      if (isPlayerOne == Server.isPlayerOneTurn()) {
-        out.writeObject(true);
-
-        final int[] move = (int[]) in.readObject();
-        out.writeObject(processMove(move));
-        Server.passTurn();
-      } else out.writeObject(false);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    this.clientSocket = clientSocket;
   }
 
   private static int[][] processMove(int[] move) {
@@ -51,23 +37,26 @@ public class GameHandler {
 
     return new int[][] {};
   }
-}
 
-/*  private static String processMove(int[] move) {
-  final int[][][] playerShips = Server.getShipPositions()[Server.isPlayerOneTurn() ? 1 : 0];
+  @Override
+  public void run() {
+    try (Socket socket = clientSocket;
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
-  for (int i = 0; i < playerShips.length; i++) {
-    int[][] ship = playerShips[i];
+      final boolean isPlayerOne = (Boolean) in.readObject();
+      if (isPlayerOne == Server.isPlayerOneTurn()) {
+        out.writeObject(true);
 
-    for (int j = 0; j < ship.length; j++)
-      if (ship[j][0] == move[0] && ship[j][1] == move[1]) {
-        ship[j] = ship[ship.length - 1];
-        ship = java.util.Arrays.copyOf(ship, ship.length - 1);
-        playerShips[i] = ship;
+        final int[] move = (int[]) in.readObject();
+        out.writeObject(processMove(move));
+        Server.passTurn();
 
-        return ship.length == 0 ? "Sunk" : "Hit";
-      }
+        while (isPlayerOne == Server.isPlayerOneTurn()) Thread.sleep(100);
+        out.writeObject("Your turn");
+      } else out.writeObject(false);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
-
-  return "Miss";
-}*/
+}

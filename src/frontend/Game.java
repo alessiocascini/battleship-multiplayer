@@ -87,6 +87,9 @@ public class Game extends JFrame {
         }
 
         opponentPanel.getComponent(row * SIZE + col).setEnabled(false);
+
+        String waitMsg = (String) in.readObject();
+        System.out.println("Received from server: " + waitMsg);
       } else JOptionPane.showMessageDialog(this, "It's not your turn!");
     } catch (Exception e) {
       e.printStackTrace();
