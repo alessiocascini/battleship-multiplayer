@@ -14,17 +14,16 @@ public class ClientHandler implements Runnable {
   @Override
   public void run() {
     try (Socket socket = clientSocket;
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-        PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
       int[][][] shipPositions = (int[][][]) in.readObject();
       System.out.println("Received ship positions:" + Arrays.deepToString(shipPositions));
 
       Server.storeShipPositions(shipPositions);
 
-      if (Server.getShipPositions()[1] == null) {
-        while (Server.getShipPositions()[1] == null) Thread.sleep(100);
-        out.println(0);
-      } else out.println(1);
+      final boolean isFirstPlayer = Server.getShipPositions()[1] == null;
+      if (isFirstPlayer) while (Server.getShipPositions()[1] == null) Thread.sleep(100);
+      out.writeObject(isFirstPlayer);
     } catch (IOException | ClassNotFoundException | InterruptedException e) {
       e.printStackTrace();
     }

@@ -72,16 +72,18 @@ public class Prepare extends JFrame {
       for (int i = 0; i < SHIPS.length; i++) shipPositions[i] = positions.get(SHIPS[i]);
 
       try (Socket socket = new Socket("localhost", 5000);
-          BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-          ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+          ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+          ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
         out.writeObject(shipPositions);
 
-        int response = Integer.parseInt(in.readLine());
-        if (response == 0 || response == 1) {
-          this.dispose();
-          SwingUtilities.invokeLater(() -> new Game(shipPositions, socket));
-        } else JOptionPane.showMessageDialog(this, "Unexpected response from server: " + response);
-      } catch (IOException e) {
+        boolean isFirstPlayer = (Boolean) in.readObject();
+
+        if (isFirstPlayer) JOptionPane.showMessageDialog(this, "You start first!");
+        else JOptionPane.showMessageDialog(this, "Opponent starts first!");
+
+        new Game(shipPositions, isFirstPlayer);
+        this.dispose();
+      } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
       }
     } else JOptionPane.showMessageDialog(this, "Place all ships before confirming!");
@@ -97,11 +99,23 @@ public class Prepare extends JFrame {
         final int[][] coords = new int[ship.size][2];
 
         for (int i = 0; i < ship.size; i++) {
-          coords[i][0] = row + (horizontal ? 0 : i);
-          coords[i][1] = col + (horizontal ? i : 0);
+          int r = row + (horizontal ? 0 : i);
+          int c = col + (horizontal ? i : 0);
 
-          gridPanel.getComponent(coords[i][0] * SIZE + coords[i][1]).setBackground(Color.GRAY);
+          for (int[][] position : positions.values())
+            for (int[] cell : position)
+              if (cell[0] == r && cell[1] == c) {
+                JOptionPane.showMessageDialog(this, "Ship overlap!");
+                return;
+              }
+
+          coords[i][0] = r;
+          coords[i][1] = c;
         }
+
+        for (int i = 0; i < ship.size; i++)
+          gridPanel.getComponent(coords[i][0] * SIZE + coords[i][1]).setBackground(Color.GRAY);
+
         positions.put(ship, coords);
       } else JOptionPane.showMessageDialog(this, "Ship out of bounds!");
     } else JOptionPane.showMessageDialog(this, "Ship already placed!");
