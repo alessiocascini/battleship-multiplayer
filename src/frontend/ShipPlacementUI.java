@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class ShipPlacementUI extends JFrame {
-  public static final int SIZE = 4; // Should be 10 for production
+  public static final int SIZE = 4; // Grid size, normally 10 for full game
   private static final Ship[] SHIPS = {
     new Ship("Ship A", 2), new Ship("Ship B", 2), new Ship("Ship C", 3)
   };
@@ -16,6 +16,7 @@ public class ShipPlacementUI extends JFrame {
   private final JComboBox<String> shipSelector;
   private final JComboBox<String> orientationSelector;
 
+  // Store the positions of each ship
   private final HashMap<Ship, int[][]> positions = new HashMap<>();
 
   public ShipPlacementUI() {
@@ -25,15 +26,18 @@ public class ShipPlacementUI extends JFrame {
     setSize(400, 600);
     setLayout(new BorderLayout());
 
+    // Create the grid buttons
     gridPanel = new JPanel(new GridLayout(SIZE, SIZE));
     for (int i = 0; i < SIZE * SIZE; i++) {
       final JButton button = new JButton();
       final int row = i / SIZE;
       final int col = i % SIZE;
+      // Clicking a cell attempts to place the selected ship
       button.addActionListener(_ -> cellClicked(row, col));
       gridPanel.add(button);
     }
 
+    // Control panel with selectors and buttons
     JPanel controlPanel = new JPanel(new GridLayout(4, 1));
 
     shipSelector = new JComboBox<>();
@@ -47,7 +51,7 @@ public class ShipPlacementUI extends JFrame {
     JButton resetButton = new JButton("Reset");
     resetButton.addActionListener(
         _ -> {
-          positions.clear();
+          positions.clear(); // Clear all ship placements
           for (Component comp : gridPanel.getComponents()) comp.setBackground(null);
         });
 
@@ -66,6 +70,7 @@ public class ShipPlacementUI extends JFrame {
     SwingUtilities.invokeLater(ShipPlacementUI::new);
   }
 
+  // Send ship positions to the server and start the game
   private void connectToServer() {
     if (positions.size() == SHIPS.length) {
       final int[][][] shipPositions = new int[SHIPS.length][][];
@@ -74,30 +79,34 @@ public class ShipPlacementUI extends JFrame {
       try (Socket socket = new Socket("localhost", 5000);
           ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
           ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-        out.writeObject(shipPositions);
+        out.writeObject(shipPositions); // Send ship positions
 
-        boolean isFirstPlayer = (Boolean) in.readObject();
+        boolean isFirstPlayer = (Boolean) in.readObject(); // Receive turn info
 
+        // Notify player who starts first
         if (isFirstPlayer) JOptionPane.showMessageDialog(this, "You start first!");
         else JOptionPane.showMessageDialog(this, "Opponent starts first!");
 
-        new GameUI(shipPositions, isFirstPlayer);
-        this.dispose();
+        new GameUI(shipPositions, isFirstPlayer); // Start game UI
+        this.dispose(); // Close placement window
       } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
       }
     } else JOptionPane.showMessageDialog(this, "Place all ships before confirming!");
   }
 
+  // Handle clicking on a cell to place a ship
   private void cellClicked(final int row, final int col) {
     final Ship ship = SHIPS[shipSelector.getSelectedIndex()];
 
-    if (!positions.containsKey(ship)) {
+    if (!positions.containsKey(ship)) { // Only place ships not already placed
       final boolean horizontal = orientationSelector.getSelectedIndex() == 0;
 
+      // Check if ship fits within bounds
       if (!(horizontal ? col + ship.size > SIZE : row + ship.size > SIZE)) {
         final int[][] coords = new int[ship.size][2];
 
+        // Check for overlaps with existing ships
         for (int i = 0; i < ship.size; i++) {
           int r = row + (horizontal ? 0 : i);
           int c = col + (horizontal ? i : 0);
@@ -113,13 +122,15 @@ public class ShipPlacementUI extends JFrame {
           coords[i][1] = c;
         }
 
+        // Update grid color to show ship placement
         for (int i = 0; i < ship.size; i++)
           gridPanel.getComponent(coords[i][0] * SIZE + coords[i][1]).setBackground(Color.GRAY);
 
-        positions.put(ship, coords);
+        positions.put(ship, coords); // Save ship position
       } else JOptionPane.showMessageDialog(this, "Ship out of bounds!");
     } else JOptionPane.showMessageDialog(this, "Ship already placed!");
   }
 
+  // Simple record to represent a ship
   private record Ship(String name, int size) {}
 }
