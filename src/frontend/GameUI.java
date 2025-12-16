@@ -108,7 +108,7 @@ public class GameUI extends JFrame {
     }
   }
 
-  void processOpponentMove(ObjectInputStream in) throws IOException, ClassNotFoundException {
+  private void processOpponentMove(ObjectInputStream in) throws IOException, ClassNotFoundException {
     int[] opponentMove = (int[]) in.readObject();
     int[][] opponentResult = (int[][]) in.readObject();
 

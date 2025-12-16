@@ -83,7 +83,6 @@ public class GameHandler implements Runnable {
           out.writeObject(new int[] {-1, -1});
         else out.writeObject(lastMove);
         out.writeObject(lastResult);
-
       } else out.writeObject(false);
     } catch (Exception e) {
       e.printStackTrace();
