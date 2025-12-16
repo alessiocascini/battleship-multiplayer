@@ -4,12 +4,7 @@ import java.io.IOException;
 import java.net.*;
 
 public class Server {
-  public static final int[] sunkenShipsCount = {0, 0};
   public static final Ship[][] shipPositions = new Ship[2][];
-  public static int[] lastMove = null;
-  public static int[][] lastResult = null;
-  public static boolean isFirstTurn = true;
-  private static boolean isPlayerOneTurn = true;
 
   public static void main(String[] args) {
     try (ServerSocket serverSocket = new ServerSocket(5000)) {
@@ -42,14 +37,6 @@ public class Server {
 
   public static boolean isWaitingForSecondPlayer() {
     return shipPositions[1] == null;
-  }
-
-  public static boolean isPlayerOneTurn() {
-    return isPlayerOneTurn;
-  }
-
-  public static void passTurn() {
-    isPlayerOneTurn = !isPlayerOneTurn;
   }
 
   public static class Ship {

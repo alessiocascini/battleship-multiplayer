@@ -17,7 +17,6 @@ public class ClientHandler implements Runnable {
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
       int[][][] shipPositions = (int[][][]) in.readObject();
-      System.out.println("Received ship positions:" + Arrays.deepToString(shipPositions));
 
       Server.storeShipPositions(shipPositions);
 

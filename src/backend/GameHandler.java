@@ -4,6 +4,11 @@ import java.io.*;
 import java.net.Socket;
 
 public class GameHandler implements Runnable {
+  private static final int[] sunkenShipsCount = {0, 0};
+  private static boolean isPlayerOneTurn = true;
+  private static boolean isFirstTurn = true;
+  private static int[] lastMove = null;
+  private static int[][] lastResult = null;
   private final Socket clientSocket;
 
   public GameHandler(final Socket clientSocket) {
@@ -11,7 +16,7 @@ public class GameHandler implements Runnable {
   }
 
   private static int[][] processMove(int[] move) {
-    final Server.Ship[] playerShips = Server.shipPositions[Server.isPlayerOneTurn() ? 1 : 0];
+    final Server.Ship[] playerShips = Server.shipPositions[isPlayerOneTurn ? 1 : 0];
 
     for (Server.Ship ship : playerShips)
       for (int i = 0; i < ship.cells.length; i++)
@@ -44,22 +49,22 @@ public class GameHandler implements Runnable {
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
       final boolean isPlayerOne = (Boolean) in.readObject();
-      if (isPlayerOne == Server.isPlayerOneTurn()) {
+      if (isPlayerOne == isPlayerOneTurn) {
         out.writeObject(true);
 
-        if (!isPlayerOne && Server.isFirstTurn) {
-          out.writeObject(Server.lastMove);
-          out.writeObject(Server.lastResult);
+        if (!isPlayerOne && isFirstTurn) {
+          out.writeObject(lastMove);
+          out.writeObject(lastResult);
 
-          Server.isFirstTurn = false;
+          isFirstTurn = false;
         }
 
         final int[] move = (int[]) in.readObject();
         final int[][] result = processMove(move);
 
-        if (result.length > 1) Server.sunkenShipsCount[Server.isPlayerOneTurn() ? 1 : 0]++;
+        if (result.length > 1) sunkenShipsCount[isPlayerOneTurn ? 1 : 0]++;
 
-        if (Server.sunkenShipsCount[isPlayerOne ? 1 : 0]
+        if (sunkenShipsCount[isPlayerOne ? 1 : 0]
             == Server.shipPositions[isPlayerOne ? 1 : 0].length) {
           final int[][] winMessage = new int[result.length + 1][2];
           winMessage[0] = new int[] {-1, -1};
@@ -67,17 +72,17 @@ public class GameHandler implements Runnable {
           out.writeObject(winMessage);
         } else out.writeObject(result);
 
-        Server.lastMove = move;
-        Server.lastResult = result;
+        lastMove = move;
+        lastResult = result;
 
-        Server.passTurn();
+        isPlayerOneTurn = !isPlayerOneTurn;
 
-        while (isPlayerOne != Server.isPlayerOneTurn()) Thread.sleep(100);
-        if (Server.sunkenShipsCount[isPlayerOne ? 0 : 1]
+        while (isPlayerOne != isPlayerOneTurn) Thread.sleep(100);
+        if (sunkenShipsCount[isPlayerOne ? 0 : 1]
             == Server.shipPositions[isPlayerOne ? 0 : 1].length)
           out.writeObject(new int[] {-1, -1});
-        else out.writeObject(Server.lastMove);
-        out.writeObject(Server.lastResult);
+        else out.writeObject(lastMove);
+        out.writeObject(lastResult);
 
       } else out.writeObject(false);
     } catch (Exception e) {
