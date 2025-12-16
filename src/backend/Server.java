@@ -2,12 +2,10 @@ package backend;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
 
 public class Server {
-  public static final ArrayList<Ship>[] ships = new ArrayList[2];
   public static final int[] sunkenShipsCount = {0, 0};
-  private static final int[][][][] shipPositions = new int[2][][][];
+  public static final Ship[][] shipPositions = new Ship[2][];
   public static int[] lastMove = null;
   public static int[][] lastResult = null;
   public static boolean isFirstTurn = true;
@@ -24,17 +22,6 @@ public class Server {
         } while (shipPositions[1] == null);
       }
 
-      for (int player = 0; player < 2; player++) {
-        ships[player] = new ArrayList<>();
-        for (int[][] shipPos : shipPositions[player]) {
-          ArrayList<Ship.Cell> cells = new ArrayList<>();
-          for (int[] pos : shipPos) {
-            cells.add(new Ship.Cell(pos[0], pos[1]));
-          }
-          ships[player].add(new Ship(cells));
-        }
-      }
-
       while (true) {
         Socket clientSocket = serverSocket.accept();
         new Thread(new GameHandler(clientSocket)).start();
@@ -45,12 +32,16 @@ public class Server {
   }
 
   public static synchronized void storeShipPositions(int[][][] positions) {
-    shipPositions[shipPositions[0] == null ? 0 : 1] = positions;
+    int playerIndex = shipPositions[0] == null ? 0 : 1;
+    shipPositions[playerIndex] = new Ship[positions.length];
+    for (int i = 0; i < positions.length; i++)
+      shipPositions[playerIndex][i] = new Ship(positions[i]);
+
     Server.class.notifyAll();
   }
 
-  public static int[][][][] getShipPositions() {
-    return shipPositions;
+  public static boolean isWaitingForSecondPlayer() {
+    return shipPositions[1] == null;
   }
 
   public static boolean isPlayerOneTurn() {
@@ -62,11 +53,13 @@ public class Server {
   }
 
   public static class Ship {
-    final ArrayList<Cell> cells;
+    final Cell[] cells;
     boolean sunk;
 
-    Ship(ArrayList<Cell> cells) {
-      this.cells = cells;
+    Ship(int[][] cells) {
+      this.cells = new Cell[cells.length];
+      for (int i = 0; i < cells.length; i++) this.cells[i] = new Cell(cells[i][0], cells[i][1]);
+
       this.sunk = false;
     }
 

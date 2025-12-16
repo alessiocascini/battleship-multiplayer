@@ -21,8 +21,8 @@ public class ClientHandler implements Runnable {
 
       Server.storeShipPositions(shipPositions);
 
-      final boolean isFirstPlayer = Server.getShipPositions()[1] == null;
-      if (isFirstPlayer) while (Server.getShipPositions()[1] == null) Thread.sleep(100);
+      final boolean isFirstPlayer = Server.isWaitingForSecondPlayer();
+      if (isFirstPlayer) while (Server.isWaitingForSecondPlayer()) Thread.sleep(100);
       out.writeObject(isFirstPlayer);
     } catch (IOException | ClassNotFoundException | InterruptedException e) {
       e.printStackTrace();

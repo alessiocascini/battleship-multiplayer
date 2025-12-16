@@ -2,7 +2,6 @@ package backend;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class GameHandler implements Runnable {
   private final Socket clientSocket;
@@ -12,12 +11,12 @@ public class GameHandler implements Runnable {
   }
 
   private static int[][] processMove(int[] move) {
-    final ArrayList<Server.Ship> playerShips = Server.ships[Server.isPlayerOneTurn() ? 1 : 0];
+    final Server.Ship[] playerShips = Server.shipPositions[Server.isPlayerOneTurn() ? 1 : 0];
 
     for (Server.Ship ship : playerShips)
-      for (int j = 0; j < ship.cells.size(); j++)
-        if (ship.cells.get(j).row == move[0] && ship.cells.get(j).col == move[1]) {
-          ship.cells.get(j).hit = true;
+      for (int i = 0; i < ship.cells.length; i++)
+        if (ship.cells[i].row == move[0] && ship.cells[i].col == move[1]) {
+          ship.cells[i].hit = true;
 
           boolean sunk = true;
           for (Server.Ship.Cell cell : ship.cells)
@@ -27,10 +26,10 @@ public class GameHandler implements Runnable {
             }
           ship.sunk = sunk;
 
-          int[][] cells = new int[ship.cells.size()][2];
-          for (int k = 0; k < ship.cells.size(); k++) {
-            cells[k][0] = ship.cells.get(k).row;
-            cells[k][1] = ship.cells.get(k).col;
+          int[][] cells = new int[ship.cells.length][2];
+          for (int k = 0; k < ship.cells.length; k++) {
+            cells[k][0] = ship.cells[k].row;
+            cells[k][1] = ship.cells[k].col;
           }
           return sunk ? cells : new int[][] {move};
         }
@@ -61,7 +60,7 @@ public class GameHandler implements Runnable {
         if (result.length > 1) Server.sunkenShipsCount[Server.isPlayerOneTurn() ? 1 : 0]++;
 
         if (Server.sunkenShipsCount[isPlayerOne ? 1 : 0]
-            == Server.ships[isPlayerOne ? 1 : 0].size()) {
+            == Server.shipPositions[isPlayerOne ? 1 : 0].length) {
           final int[][] winMessage = new int[result.length + 1][2];
           winMessage[0] = new int[] {-1, -1};
           System.arraycopy(result, 0, winMessage, 1, result.length);
@@ -75,7 +74,8 @@ public class GameHandler implements Runnable {
 
         while (isPlayerOne != Server.isPlayerOneTurn()) Thread.sleep(100);
         if (Server.sunkenShipsCount[isPlayerOne ? 0 : 1]
-            == Server.ships[isPlayerOne ? 0 : 1].size()) out.writeObject(new int[] {-1, -1});
+            == Server.shipPositions[isPlayerOne ? 0 : 1].length)
+          out.writeObject(new int[] {-1, -1});
         else out.writeObject(Server.lastMove);
         out.writeObject(Server.lastResult);
 
