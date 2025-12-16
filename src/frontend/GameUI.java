@@ -5,16 +5,16 @@ import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 
-import static frontend.Prepare.SIZE;
+import static frontend.ShipPlacementUI.SIZE;
 
-public class Game extends JFrame {
+public class GameUI extends JFrame {
   private final JPanel playerPanel = new JPanel(new GridLayout(SIZE, SIZE));
   private final JPanel opponentPanel = new JPanel(new GridLayout(SIZE, SIZE));
 
   private final boolean isFirstPlayer;
   private boolean isFirstTurn = true;
 
-  public Game(int[][][] shipPositions, boolean isFirstPlayer) {
+  public GameUI(int[][][] shipPositions, boolean isFirstPlayer) {
     super("Game Started");
 
     this.isFirstPlayer = isFirstPlayer;

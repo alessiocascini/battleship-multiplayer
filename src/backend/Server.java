@@ -11,7 +11,7 @@ public class Server {
       synchronized (Server.class) {
         do {
           Socket clientSocket = serverSocket.accept();
-          new Thread(new ClientHandler(clientSocket)).start();
+          new Thread(new PlacementHandler(clientSocket)).start();
 
           Server.class.wait();
         } while (shipPositions[1] == null);

@@ -2,12 +2,11 @@ package backend;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
 
-public class ClientHandler implements Runnable {
+public class PlacementHandler implements Runnable {
   private final Socket clientSocket;
 
-  public ClientHandler(final Socket clientSocket) {
+  public PlacementHandler(final Socket clientSocket) {
     this.clientSocket = clientSocket;
   }
 

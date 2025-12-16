@@ -6,7 +6,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
 
-public class Prepare extends JFrame {
+public class ShipPlacementUI extends JFrame {
   public static final int SIZE = 4; // Should be 10 for production
   private static final Ship[] SHIPS = {
     new Ship("Ship A", 2), new Ship("Ship B", 2), new Ship("Ship C", 3)
@@ -18,7 +18,7 @@ public class Prepare extends JFrame {
 
   private final HashMap<Ship, int[][]> positions = new HashMap<>();
 
-  public Prepare() {
+  public ShipPlacementUI() {
     super("Place your ships");
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -63,7 +63,7 @@ public class Prepare extends JFrame {
   }
 
   public static void main(String[] args) {
-    SwingUtilities.invokeLater(Prepare::new);
+    SwingUtilities.invokeLater(ShipPlacementUI::new);
   }
 
   private void connectToServer() {
@@ -81,7 +81,7 @@ public class Prepare extends JFrame {
         if (isFirstPlayer) JOptionPane.showMessageDialog(this, "You start first!");
         else JOptionPane.showMessageDialog(this, "Opponent starts first!");
 
-        new Game(shipPositions, isFirstPlayer);
+        new GameUI(shipPositions, isFirstPlayer);
         this.dispose();
       } catch (Exception e) {
         JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
