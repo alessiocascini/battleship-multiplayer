@@ -15,33 +15,6 @@ public class GameHandler implements Runnable {
     this.clientSocket = clientSocket;
   }
 
-  private static int[][] processMove(int[] move) {
-    final Server.Ship[] playerShips = Server.shipPositions[isPlayerOneTurn ? 1 : 0];
-
-    for (Server.Ship ship : playerShips)
-      for (int i = 0; i < ship.cells.length; i++)
-        if (ship.cells[i].row == move[0] && ship.cells[i].col == move[1]) {
-          ship.cells[i].hit = true;
-
-          boolean sunk = true;
-          for (Server.Ship.Cell cell : ship.cells)
-            if (!cell.hit) {
-              sunk = false;
-              break;
-            }
-          ship.sunk = sunk;
-
-          int[][] cells = new int[ship.cells.length][2];
-          for (int k = 0; k < ship.cells.length; k++) {
-            cells[k][0] = ship.cells[k].row;
-            cells[k][1] = ship.cells[k].col;
-          }
-          return sunk ? cells : new int[][] {move};
-        }
-
-    return new int[][] {};
-  }
-
   @Override
   public void run() {
     try (Socket socket = clientSocket;
@@ -60,9 +33,9 @@ public class GameHandler implements Runnable {
         }
 
         final int[] move = (int[]) in.readObject();
-        final int[][] result = processMove(move);
+        final int[][] result = Server.Ship.processMove(isPlayerOne, move);
 
-        if (result.length > 1) sunkenShipsCount[isPlayerOneTurn ? 1 : 0]++;
+        if (result.length > 1) sunkenShipsCount[isPlayerOne ? 1 : 0]++;
 
         if (sunkenShipsCount[isPlayerOne ? 1 : 0]
             == Server.shipPositions[isPlayerOne ? 1 : 0].length) {

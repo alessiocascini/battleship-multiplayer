@@ -2,6 +2,8 @@ package backend;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Server {
   public static final Ship[][] shipPositions = new Ship[2][];
@@ -39,27 +41,24 @@ public class Server {
     return shipPositions[1] == null;
   }
 
-  public static class Ship {
-    final Cell[] cells;
-    boolean sunk;
+  public record Ship(int[][] cells) {
+    private static final Set<Cell> hitCells = new HashSet<>();
 
-    Ship(int[][] cells) {
-      this.cells = new Cell[cells.length];
-      for (int i = 0; i < cells.length; i++) this.cells[i] = new Cell(cells[i][0], cells[i][1]);
+    private record Cell(boolean isPlayerOne, int row, int col) {}
 
-      this.sunk = false;
-    }
+    public static int[][] processMove(boolean isPlayerOne, int[] move) {
+      for (Ship ship : shipPositions[isPlayerOne ? 1 : 0])
+        for (int[] cell : ship.cells)
+          if (cell[0] == move[0] && cell[1] == move[1]) {
+            hitCells.add(new Cell(isPlayerOne, cell[0], cell[1]));
 
-    public static class Cell {
-      final int row;
-      final int col;
-      boolean hit;
+            for (int[] c : ship.cells)
+              if (!hitCells.contains(new Cell(isPlayerOne, c[0], c[1]))) return new int[][] {move};
 
-      Cell(int row, int col) {
-        this.row = row;
-        this.col = col;
-        this.hit = false;
-      }
+            return ship.cells;
+          }
+
+      return new int[][] {};
     }
   }
 }
