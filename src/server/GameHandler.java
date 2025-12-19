@@ -33,12 +33,11 @@ public class GameHandler implements Runnable {
         }
 
         final int[] move = (int[]) in.readObject();
-        final int[][] result = Server.Ship.processMove(isPlayerOne, move);
+        final int[][] result = Server.processMove(isPlayerOne, move);
 
         if (result.length > 1) sunkenShipsCount[isPlayerOne ? 1 : 0]++;
 
-        if (sunkenShipsCount[isPlayerOne ? 1 : 0]
-            == Server.shipPositions[isPlayerOne ? 1 : 0].length) {
+        if (sunkenShipsCount[isPlayerOne ? 1 : 0] == Server.getShipCount()) {
           final int[][] winMessage = new int[result.length + 1][2];
           winMessage[0] = new int[] {-1, -1};
           System.arraycopy(result, 0, winMessage, 1, result.length);
@@ -51,8 +50,7 @@ public class GameHandler implements Runnable {
         isPlayerOneTurn = !isPlayerOneTurn;
 
         while (isPlayerOne != isPlayerOneTurn) Thread.sleep(100);
-        if (sunkenShipsCount[isPlayerOne ? 0 : 1]
-            == Server.shipPositions[isPlayerOne ? 0 : 1].length)
+        if (sunkenShipsCount[isPlayerOne ? 0 : 1] == Server.getShipCount())
           out.writeObject(new int[] {-1, -1});
         else out.writeObject(lastMove);
         out.writeObject(lastResult);
