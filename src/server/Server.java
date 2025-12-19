@@ -2,6 +2,7 @@ package server;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -48,22 +49,28 @@ public class Server {
   }
 
   public static int[][] processMove(boolean isPlayerOne, int[] move) {
+    final Cell moveCell = new Cell(!isPlayerOne, move[0], move[1]);
+
+    hitCells.add(moveCell);
+
     for (Ship ship : shipPositions)
-      if (ship.isPlayerOne == !isPlayerOne)
-        for (int[] cell : ship.cells)
-          if (cell[0] == move[0] && cell[1] == move[1]) {
-            hitCells.add(new Cell(!isPlayerOne, move[0], move[1]));
-
-            for (int[] c : ship.cells)
-              if (!hitCells.contains(new Cell(!isPlayerOne, c[0], c[1]))) return new int[][] {move};
-
-            return ship.cells;
-          }
+      if (Arrays.asList(ship.cells).contains(moveCell))
+        return Arrays.stream(ship.cells).allMatch(hitCells::contains)
+            ? Arrays.stream(ship.cells).map(c -> new int[] {c.row, c.col}).toArray(int[][]::new)
+            : new int[][] {move};
 
     return new int[][] {};
   }
 
-  private record Ship(boolean isPlayerOne, int[][] cells) {}
+  private static class Ship {
+    private final Cell[] cells;
+
+    public Ship(boolean isPlayerOne, int[][] cells) {
+      this.cells = new Cell[cells.length];
+      for (int i = 0; i < cells.length; i++)
+        this.cells[i] = new Cell(isPlayerOne, cells[i][0], cells[i][1]);
+    }
+  }
 
   private record Cell(boolean isPlayerOne, int row, int col) {}
 }
