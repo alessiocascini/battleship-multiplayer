@@ -6,8 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Server {
-  private static final Ship[][] shipPositions = new Ship[2][];
+  private static final Set<Ship> shipPositions = new HashSet<>();
   private static final Set<Cell> hitCells = new HashSet<>();
+  private static boolean isWaitingForSecondPlayer = false;
 
   public static void main(String[] args) {
     try (ServerSocket serverSocket = new ServerSocket(5000)) {
@@ -17,7 +18,7 @@ public class Server {
           new Thread(new PlacementHandler(clientSocket)).start();
 
           Server.class.wait();
-        } while (shipPositions[1] == null);
+        } while (shipPositions.isEmpty() || isWaitingForSecondPlayer);
       }
 
       while (true) {
@@ -30,38 +31,39 @@ public class Server {
   }
 
   public static int getShipCount() {
-    return shipPositions[0].length;
+    return shipPositions.size() / 2;
   }
 
   public static synchronized void storeShipPositions(int[][][] positions) {
-    int playerIndex = shipPositions[0] == null ? 0 : 1;
-    shipPositions[playerIndex] = new Ship[positions.length];
-    for (int i = 0; i < positions.length; i++)
-      shipPositions[playerIndex][i] = new Ship(positions[i]);
+    isWaitingForSecondPlayer = !isWaitingForSecondPlayer;
+
+    for (int[][] position : positions)
+      shipPositions.add(new Ship(isWaitingForSecondPlayer, position));
 
     Server.class.notifyAll();
   }
 
   public static boolean isWaitingForSecondPlayer() {
-    return shipPositions[1] == null;
+    return isWaitingForSecondPlayer;
   }
 
   public static int[][] processMove(boolean isPlayerOne, int[] move) {
-    for (Ship ship : shipPositions[isPlayerOne ? 1 : 0])
-      for (int[] cell : ship.cells)
-        if (cell[0] == move[0] && cell[1] == move[1]) {
-          hitCells.add(new Cell(isPlayerOne, cell[0], cell[1]));
+    for (Ship ship : shipPositions)
+      if (ship.isPlayerOne == !isPlayerOne)
+        for (int[] cell : ship.cells)
+          if (cell[0] == move[0] && cell[1] == move[1]) {
+            hitCells.add(new Cell(!isPlayerOne, move[0], move[1]));
 
-          for (int[] c : ship.cells)
-            if (!hitCells.contains(new Cell(isPlayerOne, c[0], c[1]))) return new int[][] {move};
+            for (int[] c : ship.cells)
+              if (!hitCells.contains(new Cell(!isPlayerOne, c[0], c[1]))) return new int[][] {move};
 
-          return ship.cells;
-        }
+            return ship.cells;
+          }
 
     return new int[][] {};
   }
 
-  private record Ship(int[][] cells) {}
+  private record Ship(boolean isPlayerOne, int[][] cells) {}
 
   private record Cell(boolean isPlayerOne, int row, int col) {}
 }
