@@ -1,11 +1,11 @@
-package frontend;
+package client;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 
-import static frontend.ShipPlacementUI.SIZE;
+import static client.ShipPlacementUI.SIZE;
 
 public class GameUI extends JFrame {
   private final JPanel playerPanel = new JPanel(new GridLayout(SIZE, SIZE));
