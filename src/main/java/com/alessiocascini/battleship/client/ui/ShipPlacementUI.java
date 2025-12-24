@@ -1,5 +1,8 @@
-package com.alessiocascini.battleship.client;
+package com.alessiocascini.battleship.client.ui;
 
+import com.alessiocascini.battleship.client.event.CellClickHandler;
+import com.alessiocascini.battleship.client.event.CellClickListener;
+import com.alessiocascini.battleship.client.model.Ship;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;

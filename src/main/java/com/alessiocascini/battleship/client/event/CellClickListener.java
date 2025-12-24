@@ -1,8 +1,9 @@
-package com.alessiocascini.battleship.client;
+package com.alessiocascini.battleship.client.event;
 
-import static com.alessiocascini.battleship.client.ShipPlacementUI.gridSize;
-import static com.alessiocascini.battleship.client.ShipPlacementUI.ships;
+import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.gridSize;
+import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.ships;
 
+import com.alessiocascini.battleship.client.model.Ship;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;

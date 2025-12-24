@@ -1,4 +1,4 @@
-package com.alessiocascini.battleship.client;
+package com.alessiocascini.battleship.client.event;
 
 public interface CellClickHandler {
   int getSelectedShipIndex();
