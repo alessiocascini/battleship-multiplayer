@@ -37,7 +37,7 @@ public class ShipPlacementUI extends JFrame implements CellClickHandler {
       final JButton button = new JButton();
       final int row = i / gridSize;
       final int col = i % gridSize;
-      button.addActionListener(new CellClickListener(this, positions, gridPanel, row, col));
+      button.addActionListener(new CellClickListener(this, positions, row, col));
       gridPanel.add(button);
     }
 
@@ -109,5 +109,11 @@ public class ShipPlacementUI extends JFrame implements CellClickHandler {
   @Override
   public void showMessage(String message) {
     JOptionPane.showMessageDialog(this, message);
+  }
+
+  @Override
+  public void highlightShipCells(Ship ship, int[][] coords) {
+    for (int i = 0; i < ship.size(); i++)
+      gridPanel.getComponent(coords[i][0] * gridSize + coords[i][1]).setBackground(Color.GRAY);
   }
 }

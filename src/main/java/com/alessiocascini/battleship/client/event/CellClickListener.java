@@ -4,26 +4,21 @@ import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.gridSize;
 import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.ships;
 
 import com.alessiocascini.battleship.client.model.Ship;
-import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
-import javax.swing.*;
 
 public class CellClickListener implements ActionListener {
   private final CellClickHandler handler;
   private final HashMap<Ship, int[][]> positions;
-  private final JPanel gridPanel;
   private final int row, col;
 
   public CellClickListener(
       CellClickHandler handler,
       HashMap<Ship, int[][]> positions,
-      JPanel gridPanel,
       int row,
       int col) {
     this.handler = handler;
     this.positions = positions;
-    this.gridPanel = gridPanel;
     this.row = row;
     this.col = col;
   }
@@ -45,7 +40,7 @@ public class CellClickListener implements ActionListener {
           for (int[][] position : positions.values())
             for (int[] cell : position)
               if (cell[0] == r && cell[1] == c) {
-                handler.showMessage("Ship overlap!");
+                handler.showMessage("Ship overlaps another ship!");
                 return;
               }
 
@@ -53,11 +48,9 @@ public class CellClickListener implements ActionListener {
           coords[i][1] = c;
         }
 
-        for (int i = 0; i < ship.size(); i++)
-          gridPanel.getComponent(coords[i][0] * gridSize + coords[i][1]).setBackground(Color.GRAY);
-
+        handler.highlightShipCells(ship, coords);
         positions.put(ship, coords);
-      } else handler.showMessage("Ship out of bounds!");
+      } else handler.showMessage("Ship goes out of bounds!");
     } else handler.showMessage("Ship already placed!");
   }
 }
