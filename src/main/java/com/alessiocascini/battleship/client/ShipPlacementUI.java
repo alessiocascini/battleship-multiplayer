@@ -1,15 +1,19 @@
 package com.alessiocascini.battleship.client;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashMap;
+import javax.swing.*;
 
-public class ShipPlacementUI extends JFrame {
-  public static final int SIZE = 4; // Should be 10 for production
-  private static final Ship[] SHIPS = {
-    new Ship("Ship A", 2), new Ship("Ship B", 2), new Ship("Ship C", 3)
+public class ShipPlacementUI extends JFrame implements CellClickHandler {
+  public static final int gridSize = 10;
+  public static final Ship[] ships = {
+    new Ship("Carrier", 5),
+    new Ship("Battleship", 4),
+    new Ship("Cruiser", 3),
+    new Ship("Submarine", 3),
+    new Ship("Destroyer", 2)
   };
 
   private final JPanel gridPanel;
@@ -22,22 +26,22 @@ public class ShipPlacementUI extends JFrame {
     super("Place your ships");
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(400, 600);
+    setSize(600, 700);
     setLayout(new BorderLayout());
 
-    gridPanel = new JPanel(new GridLayout(SIZE, SIZE));
-    for (int i = 0; i < SIZE * SIZE; i++) {
+    gridPanel = new JPanel(new GridLayout(gridSize, gridSize));
+    for (int i = 0; i < gridSize * gridSize; i++) {
       final JButton button = new JButton();
-      final int row = i / SIZE;
-      final int col = i % SIZE;
-      button.addActionListener(_ -> cellClicked(row, col));
+      final int row = i / gridSize;
+      final int col = i % gridSize;
+      button.addActionListener(new CellClickListener(this, positions, gridPanel, row, col));
       gridPanel.add(button);
     }
 
     JPanel controlPanel = new JPanel(new GridLayout(4, 1));
 
     shipSelector = new JComboBox<>();
-    for (Ship ship : SHIPS) shipSelector.addItem(ship.name + " (size: " + ship.size + ")");
+    for (Ship ship : ships) shipSelector.addItem(ship.name() + " (size: " + ship.size() + ")");
 
     orientationSelector = new JComboBox<>(new String[] {"Horizontal", "Vertical"});
 
@@ -67,9 +71,9 @@ public class ShipPlacementUI extends JFrame {
   }
 
   private void connectToServer() {
-    if (positions.size() == SHIPS.length) {
-      final int[][][] shipPositions = new int[SHIPS.length][][];
-      for (int i = 0; i < SHIPS.length; i++) shipPositions[i] = positions.get(SHIPS[i]);
+    if (positions.size() == ships.length) {
+      final int[][][] shipPositions = new int[ships.length][][];
+      for (int i = 0; i < ships.length; i++) shipPositions[i] = positions.get(ships[i]);
 
       try (Socket socket = new Socket("localhost", 5000);
           ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
@@ -89,37 +93,18 @@ public class ShipPlacementUI extends JFrame {
     } else JOptionPane.showMessageDialog(this, "Place all ships before confirming!");
   }
 
-  private void cellClicked(final int row, final int col) {
-    final Ship ship = SHIPS[shipSelector.getSelectedIndex()];
-
-    if (!positions.containsKey(ship)) {
-      final boolean horizontal = orientationSelector.getSelectedIndex() == 0;
-
-      if (!(horizontal ? col + ship.size > SIZE : row + ship.size > SIZE)) {
-        final int[][] coords = new int[ship.size][2];
-
-        for (int i = 0; i < ship.size; i++) {
-          int r = row + (horizontal ? 0 : i);
-          int c = col + (horizontal ? i : 0);
-
-          for (int[][] position : positions.values())
-            for (int[] cell : position)
-              if (cell[0] == r && cell[1] == c) {
-                JOptionPane.showMessageDialog(this, "Ship overlap!");
-                return;
-              }
-
-          coords[i][0] = r;
-          coords[i][1] = c;
-        }
-
-        for (int i = 0; i < ship.size; i++)
-          gridPanel.getComponent(coords[i][0] * SIZE + coords[i][1]).setBackground(Color.GRAY);
-
-        positions.put(ship, coords);
-      } else JOptionPane.showMessageDialog(this, "Ship out of bounds!");
-    } else JOptionPane.showMessageDialog(this, "Ship already placed!");
+  @Override
+  public int getSelectedShipIndex() {
+    return shipSelector.getSelectedIndex();
   }
 
-  private record Ship(String name, int size) {}
+  @Override
+  public int getSelectedOrientationIndex() {
+    return orientationSelector.getSelectedIndex();
+  }
+
+  @Override
+  public void showMessage(String message) {
+    JOptionPane.showMessageDialog(this, message);
+  }
 }
