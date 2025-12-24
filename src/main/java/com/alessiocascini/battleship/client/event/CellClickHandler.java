@@ -9,5 +9,5 @@ public interface CellClickHandler {
 
   void showMessage(String message);
 
-  void highlightShipCells(Ship ship, int[][] coords);
+  void highlightShipCells(Ship ship);
 }

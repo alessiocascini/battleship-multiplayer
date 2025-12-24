@@ -1,21 +1,22 @@
 package com.alessiocascini.battleship.client.event;
 
 import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.gridSize;
-import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.ships;
+import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.shipInfos;
 
+import com.alessiocascini.battleship.client.model.Cell;
 import com.alessiocascini.battleship.client.model.Ship;
+import com.alessiocascini.battleship.client.model.ShipInfo;
 import java.awt.event.*;
-import java.util.HashMap;
+import java.util.List;
 
 public class CellClickListener implements ActionListener {
   private final CellClickHandler handler;
-  private final HashMap<Ship, int[][]> positions;
+  private final List<Ship> ships;
   private final int row, col;
 
-  public CellClickListener(
-      CellClickHandler handler, HashMap<Ship, int[][]> positions, int row, int col) {
+  public CellClickListener(CellClickHandler handler, List<Ship> ships, int row, int col) {
     this.handler = handler;
-    this.positions = positions;
+    this.ships = ships;
     this.row = row;
     this.col = col;
   }
@@ -27,30 +28,26 @@ public class CellClickListener implements ActionListener {
   }
 
   private String handleCellClick() {
-    final Ship ship = ships[handler.getSelectedShipIndex()];
+    final ShipInfo ship = shipInfos[handler.getSelectedShipIndex()];
 
-    if (positions.containsKey(ship)) return "Ship already placed!";
+    if (ships.stream().anyMatch(s -> s.info().equals(ship))) return "Ship already placed!";
 
     final boolean horizontal = handler.getSelectedOrientationIndex() == 0;
 
     if (horizontal ? col + ship.size() > gridSize : row + ship.size() > gridSize)
       return "Ship goes out of bounds!";
 
-    final int[][] coords = new int[ship.size()][2];
+    final Cell[] coords = new Cell[ship.size()];
 
     for (int i = 0; i < ship.size(); i++) {
-      int r = row + (horizontal ? 0 : i);
-      int c = col + (horizontal ? i : 0);
-
-      for (int[][] position : positions.values())
-        for (int[] cell : position)
-          if (cell[0] == r && cell[1] == c) return "Ship overlaps another ship!";
-
-      coords[i] = new int[] {r, c};
+      final Cell current = horizontal ? new Cell(row, col + i) : new Cell(row + i, col);
+      if (ships.stream().anyMatch(s -> List.of(s.cells()).contains(current)))
+        return "Ship overlaps another ship!";
+      coords[i] = current;
     }
 
-    handler.highlightShipCells(ship, coords);
-    positions.put(ship, coords);
+    handler.highlightShipCells(new Ship(ship, coords));
+    ships.add(new Ship(ship, coords));
 
     return null;
   }
