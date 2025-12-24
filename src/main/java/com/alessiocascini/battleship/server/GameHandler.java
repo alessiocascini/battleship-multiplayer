@@ -1,4 +1,4 @@
-package server;
+package com.alessiocascini.battleship.server;
 
 import java.io.*;
 import java.net.Socket;

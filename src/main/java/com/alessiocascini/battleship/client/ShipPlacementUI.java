@@ -1,4 +1,4 @@
-package client;
+package com.alessiocascini.battleship.client;
 
 import javax.swing.*;
 import java.awt.*;

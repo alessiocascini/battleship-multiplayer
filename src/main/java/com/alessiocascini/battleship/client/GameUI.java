@@ -1,11 +1,11 @@
-package client;
+package com.alessiocascini.battleship.client;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 
-import static client.ShipPlacementUI.SIZE;
+import static com.alessiocascini.battleship.client.ShipPlacementUI.SIZE;
 
 public class GameUI extends JFrame {
   private final JPanel playerPanel = new JPanel(new GridLayout(SIZE, SIZE));
