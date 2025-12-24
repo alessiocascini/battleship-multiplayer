@@ -10,11 +10,11 @@ import java.awt.event.*;
 import java.util.List;
 
 public class CellClickListener implements ActionListener {
-  private final CellClickHandler handler;
+  private final ShipPlacementHandler handler;
   private final List<Ship> ships;
   private final int row, col;
 
-  public CellClickListener(CellClickHandler handler, List<Ship> ships, int row, int col) {
+  public CellClickListener(ShipPlacementHandler handler, List<Ship> ships, int row, int col) {
     this.handler = handler;
     this.ships = ships;
     this.row = row;

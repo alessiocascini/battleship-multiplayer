@@ -2,9 +2,12 @@ package com.alessiocascini.battleship.client.ui;
 
 import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.gridSize;
 
+import com.alessiocascini.battleship.client.model.Cell;
+import com.alessiocascini.battleship.client.model.Ship;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import javax.swing.*;
 
 public class GameUI extends JFrame {
@@ -14,7 +17,7 @@ public class GameUI extends JFrame {
   private final boolean isFirstPlayer;
   private boolean isFirstTurn = true;
 
-  public GameUI(int[][][] shipPositions, boolean isFirstPlayer) {
+  public GameUI(List<Ship> shipPositions, boolean isFirstPlayer) {
     super("Game Started");
 
     this.isFirstPlayer = isFirstPlayer;
@@ -36,8 +39,9 @@ public class GameUI extends JFrame {
       final int row = i / gridSize;
       final int col = i % gridSize;
 
-      for (int[][] ship : shipPositions)
-        for (int[] pos : ship) if (pos[0] == row && pos[1] == col) button.setBackground(Color.GRAY);
+      for (Ship ship : shipPositions)
+        for (Cell cell : ship.cells())
+          if (cell.row() == row && cell.col() == col) button.setBackground(Color.GRAY);
 
       button.setEnabled(false);
       playerPanel.add(button);

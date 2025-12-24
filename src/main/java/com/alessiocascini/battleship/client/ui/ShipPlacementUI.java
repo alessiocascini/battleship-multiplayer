@@ -1,18 +1,17 @@
 package com.alessiocascini.battleship.client.ui;
 
-import com.alessiocascini.battleship.client.event.CellClickHandler;
 import com.alessiocascini.battleship.client.event.CellClickListener;
+import com.alessiocascini.battleship.client.event.ConfirmButtonListener;
+import com.alessiocascini.battleship.client.event.ShipPlacementHandler;
 import com.alessiocascini.battleship.client.model.Cell;
 import com.alessiocascini.battleship.client.model.Ship;
 import com.alessiocascini.battleship.client.model.ShipInfo;
 import java.awt.*;
-import java.io.*;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-public class ShipPlacementUI extends JFrame implements CellClickHandler {
+public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
   public static final int gridSize = 10;
   public static final ShipInfo[] shipInfos = {
     new ShipInfo("Carrier", 5),
@@ -53,7 +52,7 @@ public class ShipPlacementUI extends JFrame implements CellClickHandler {
     orientationSelector = new JComboBox<>(new String[] {"Horizontal", "Vertical"});
 
     JButton confirmButton = new JButton("Confirm");
-    confirmButton.addActionListener(_ -> connectToServer());
+    confirmButton.addActionListener(new ConfirmButtonListener(this, ships));
 
     JButton resetButton = new JButton("Reset");
     resetButton.addActionListener(
@@ -77,29 +76,6 @@ public class ShipPlacementUI extends JFrame implements CellClickHandler {
     SwingUtilities.invokeLater(ShipPlacementUI::new);
   }
 
-  private void connectToServer() {
-    if (ships.size() == shipInfos.length) {
-      final int[][][] shipPositions = new int[shipInfos.length][][];
-      for (int i = 0; i < ships.size(); i++) shipPositions[i] = ships.get(i).getCellsAsArray();
-
-      try (Socket socket = new Socket("localhost", 5000);
-          ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-          ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-        out.writeObject(shipPositions);
-
-        boolean isFirstPlayer = (Boolean) in.readObject();
-
-        if (isFirstPlayer) JOptionPane.showMessageDialog(this, "You start first!");
-        else JOptionPane.showMessageDialog(this, "Opponent starts first!");
-
-        new GameUI(shipPositions, isFirstPlayer);
-        this.dispose();
-      } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Failed to connect to server: " + e.getMessage());
-      }
-    } else JOptionPane.showMessageDialog(this, "Place all ships before confirming!");
-  }
-
   @Override
   public int getSelectedShipIndex() {
     return shipSelector.getSelectedIndex();
@@ -119,5 +95,11 @@ public class ShipPlacementUI extends JFrame implements CellClickHandler {
   public void highlightShipCells(Ship ship) {
     for (Cell cell : ship.cells())
       gridPanel.getComponent(cell.row() * gridSize + cell.col()).setBackground(Color.GRAY);
+  }
+
+  @Override
+  public void proceedToGameUI(boolean isFirstPlayer) {
+    new GameUI(ships, isFirstPlayer);
+    this.dispose();
   }
 }
