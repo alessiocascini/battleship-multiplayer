@@ -13,10 +13,7 @@ public class CellClickListener implements ActionListener {
   private final int row, col;
 
   public CellClickListener(
-      CellClickHandler handler,
-      HashMap<Ship, int[][]> positions,
-      int row,
-      int col) {
+      CellClickHandler handler, HashMap<Ship, int[][]> positions, int row, int col) {
     this.handler = handler;
     this.positions = positions;
     this.row = row;
@@ -25,32 +22,36 @@ public class CellClickListener implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent e) {
+    final String errorMessage = handleCellClick();
+    if (errorMessage != null) handler.showMessage(errorMessage);
+  }
+
+  private String handleCellClick() {
     final Ship ship = ships[handler.getSelectedShipIndex()];
 
-    if (!positions.containsKey(ship)) {
-      final boolean horizontal = handler.getSelectedOrientationIndex() == 0;
+    if (positions.containsKey(ship)) return "Ship already placed!";
 
-      if (!(horizontal ? col + ship.size() > gridSize : row + ship.size() > gridSize)) {
-        final int[][] coords = new int[ship.size()][2];
+    final boolean horizontal = handler.getSelectedOrientationIndex() == 0;
 
-        for (int i = 0; i < ship.size(); i++) {
-          int r = row + (horizontal ? 0 : i);
-          int c = col + (horizontal ? i : 0);
+    if (horizontal ? col + ship.size() > gridSize : row + ship.size() > gridSize)
+      return "Ship goes out of bounds!";
 
-          for (int[][] position : positions.values())
-            for (int[] cell : position)
-              if (cell[0] == r && cell[1] == c) {
-                handler.showMessage("Ship overlaps another ship!");
-                return;
-              }
+    final int[][] coords = new int[ship.size()][2];
 
-          coords[i][0] = r;
-          coords[i][1] = c;
-        }
+    for (int i = 0; i < ship.size(); i++) {
+      int r = row + (horizontal ? 0 : i);
+      int c = col + (horizontal ? i : 0);
 
-        handler.highlightShipCells(ship, coords);
-        positions.put(ship, coords);
-      } else handler.showMessage("Ship goes out of bounds!");
-    } else handler.showMessage("Ship already placed!");
+      for (int[][] position : positions.values())
+        for (int[] cell : position)
+          if (cell[0] == r && cell[1] == c) return "Ship overlaps another ship!";
+
+      coords[i] = new int[] {r, c};
+    }
+
+    handler.highlightShipCells(ship, coords);
+    positions.put(ship, coords);
+
+    return null;
   }
 }
