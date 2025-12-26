@@ -1,7 +1,7 @@
 package com.alessiocascini.battleship.client.event;
 
-import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.gridSize;
-import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.shipInfos;
+import static com.alessiocascini.battleship.client.ui.PlacementUI.gridSize;
+import static com.alessiocascini.battleship.client.ui.PlacementUI.shipInfos;
 
 import com.alessiocascini.battleship.client.model.Cell;
 import com.alessiocascini.battleship.client.model.Ship;
@@ -9,12 +9,12 @@ import com.alessiocascini.battleship.client.model.ShipInfo;
 import java.awt.event.*;
 import java.util.List;
 
-public class CellClickListener implements ActionListener {
-  private final ShipPlacementHandler handler;
+public class PlacementCellListener implements ActionListener {
+  private final PlacementHandler handler;
   private final List<Ship> ships;
   private final int row, col;
 
-  public CellClickListener(ShipPlacementHandler handler, List<Ship> ships, int row, int col) {
+  public PlacementCellListener(PlacementHandler handler, List<Ship> ships, int row, int col) {
     this.handler = handler;
     this.ships = ships;
     this.row = row;

@@ -1,6 +1,6 @@
 package com.alessiocascini.battleship.client.event;
 
-import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.shipInfos;
+import static com.alessiocascini.battleship.client.ui.PlacementUI.shipInfos;
 
 import com.alessiocascini.battleship.client.model.Ship;
 import java.awt.event.*;
@@ -8,12 +8,12 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-public class ConfirmButtonListener implements ActionListener {
-  private final ShipPlacementHandler handler;
+public class ConfirmPlacementListener implements ActionListener {
+  private final PlacementHandler handler;
   private final List<Ship> ships;
   private Boolean isFirstPlayer = null;
 
-  public ConfirmButtonListener(ShipPlacementHandler handler, List<Ship> ships) {
+  public ConfirmPlacementListener(PlacementHandler handler, List<Ship> ships) {
     this.handler = handler;
     this.ships = ships;
   }

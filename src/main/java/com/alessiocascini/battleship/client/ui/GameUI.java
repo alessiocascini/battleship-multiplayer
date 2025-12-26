@@ -1,6 +1,6 @@
 package com.alessiocascini.battleship.client.ui;
 
-import static com.alessiocascini.battleship.client.ui.ShipPlacementUI.gridSize;
+import static com.alessiocascini.battleship.client.ui.PlacementUI.gridSize;
 
 import com.alessiocascini.battleship.client.model.Cell;
 import com.alessiocascini.battleship.client.model.Ship;

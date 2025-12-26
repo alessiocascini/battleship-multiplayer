@@ -1,8 +1,8 @@
 package com.alessiocascini.battleship.client.ui;
 
-import com.alessiocascini.battleship.client.event.CellClickListener;
-import com.alessiocascini.battleship.client.event.ConfirmButtonListener;
-import com.alessiocascini.battleship.client.event.ShipPlacementHandler;
+import com.alessiocascini.battleship.client.event.PlacementCellListener;
+import com.alessiocascini.battleship.client.event.ConfirmPlacementListener;
+import com.alessiocascini.battleship.client.event.PlacementHandler;
 import com.alessiocascini.battleship.client.model.Cell;
 import com.alessiocascini.battleship.client.model.Ship;
 import com.alessiocascini.battleship.client.model.ShipInfo;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
-public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
+public class PlacementUI extends JFrame implements PlacementHandler {
   public static final int gridSize = 10;
   public static final ShipInfo[] shipInfos = {
     new ShipInfo("Carrier", 5),
@@ -27,7 +27,7 @@ public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
 
   private final List<Ship> ships = new ArrayList<>();
 
-  public ShipPlacementUI() {
+  public PlacementUI() {
     super("Place your ships");
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,7 +39,7 @@ public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
       final JButton button = new JButton();
       final int row = i / gridSize;
       final int col = i % gridSize;
-      button.addActionListener(new CellClickListener(this, ships, row, col));
+      button.addActionListener(new PlacementCellListener(this, ships, row, col));
       gridPanel.add(button);
     }
 
@@ -52,7 +52,7 @@ public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
     orientationSelector = new JComboBox<>(new String[] {"Horizontal", "Vertical"});
 
     JButton confirmButton = new JButton("Confirm");
-    confirmButton.addActionListener(new ConfirmButtonListener(this, ships));
+    confirmButton.addActionListener(new ConfirmPlacementListener(this, ships));
 
     JButton resetButton = new JButton("Reset");
     resetButton.addActionListener(
@@ -73,7 +73,7 @@ public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
   }
 
   public static void main(String[] args) {
-    SwingUtilities.invokeLater(ShipPlacementUI::new);
+    SwingUtilities.invokeLater(PlacementUI::new);
   }
 
   @Override
@@ -93,8 +93,11 @@ public class ShipPlacementUI extends JFrame implements ShipPlacementHandler {
 
   @Override
   public void highlightShipCells(Ship ship) {
-    for (Cell cell : ship.cells())
-      gridPanel.getComponent(cell.row() * gridSize + cell.col()).setBackground(Color.GRAY);
+    for (Cell cell : ship.cells()) {
+      final JButton button = (JButton) gridPanel.getComponent(cell.row() * gridSize + cell.col());
+      button.setBackground(Color.GRAY);
+      button.setEnabled(false);
+    }
   }
 
   @Override

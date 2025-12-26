@@ -2,7 +2,7 @@ package com.alessiocascini.battleship.client.event;
 
 import com.alessiocascini.battleship.client.model.Ship;
 
-public interface ShipPlacementHandler {
+public interface PlacementHandler {
   int getSelectedShipIndex();
 
   int getSelectedOrientationIndex();
