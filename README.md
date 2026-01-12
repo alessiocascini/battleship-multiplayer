@@ -1,10 +1,10 @@
 # Battleship Multiplayer
 
-![Java](https://img.shields.io/badge/Java-17%2B-orange)
+![Java](https://img.shields.io/badge/Java-25-orange)
 ![License](https://img.shields.io/badge/License-MIT-blue)
-![Socket](https://img.shields.io/badge/Networking-TCP%20Sockets-green)
-![GitHub Package version](https://img.shields.io/github/v/release/alessiocascini/battleship-multiplayer?label=package&color=6f42c1)
-![Javadoc](https://img.shields.io/badge/Documentation-Javadoc-brightgreen)
+![Networking](https://img.shields.io/badge/Networking-TCP%20Sockets-green)
+[![Package](https://img.shields.io/github/v/release/alessiocascini/battleship-multiplayer?label=package&color=6f42c1)](https://github.com/alessiocascini/battleship-multiplayer/packages)
+[![Javadoc](https://img.shields.io/badge/Documentation-Javadoc-brightgreen)](https://alessiocascini.github.io/battleship-multiplayer/)
 
 > 📚 **Technical Documentation:** [View Javadoc Online](https://alessiocascini.github.io/battleship-multiplayer/)
 
