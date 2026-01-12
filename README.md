@@ -3,6 +3,10 @@
 ![Java](https://img.shields.io/badge/Java-17%2B-orange)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Socket](https://img.shields.io/badge/Networking-TCP%20Sockets-green)
+![GitHub Package version](https://img.shields.io/github/v/release/alessiocascini/battleship-multiplayer?label=package&color=6f42c1)
+![Javadoc](https://img.shields.io/badge/Documentation-Javadoc-brightgreen)
+
+> 📚 **Technical Documentation:** [View Javadoc Online](https://alessiocascini.github.io/battleship-multiplayer/)
 
 A Java-based multiplayer implementation of the classic **Battleship** game. This project features a robust *
 *Client-Server architecture** using Java Sockets for real-time communication and **Java Swing** for a responsive

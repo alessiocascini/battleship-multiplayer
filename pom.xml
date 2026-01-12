@@ -48,6 +48,20 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.11.2</version>
+                <configuration>
+                    <source>25</source>
+                    <show>package</show>
+                    <doclint>none</doclint>
+                    <failOnError>false</failOnError>
+                    <reportOutputDirectory>${project.build.directory}/reports</reportOutputDirectory>
+                    <destDir>apidocs</destDir>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
