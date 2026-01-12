@@ -2,25 +2,20 @@ package com.alessiocascini.battleship.client.ui;
 
 import static com.alessiocascini.battleship.client.ui.PlacementUI.gridSize;
 
+import com.alessiocascini.battleship.client.event.GameActionHandler;
+import com.alessiocascini.battleship.client.event.GameCellListener;
 import com.alessiocascini.battleship.client.model.Cell;
 import com.alessiocascini.battleship.client.model.Ship;
 import java.awt.*;
-import java.io.*;
-import java.net.Socket;
 import java.util.List;
 import javax.swing.*;
 
-public class GameUI extends JFrame {
+public class GameUI extends JFrame implements GameActionHandler {
   private final JPanel playerPanel = new JPanel(new GridLayout(gridSize, gridSize));
   private final JPanel opponentPanel = new JPanel(new GridLayout(gridSize, gridSize));
 
-  private final boolean isFirstPlayer;
-  private boolean isFirstTurn = true;
-
   public GameUI(List<Ship> shipPositions, boolean isFirstPlayer) {
     super("Game Started");
-
-    this.isFirstPlayer = isFirstPlayer;
 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setSize(400, 800);
@@ -30,7 +25,7 @@ public class GameUI extends JFrame {
       final JButton button = new JButton();
       final int row = i / gridSize;
       final int col = i % gridSize;
-      button.addActionListener(_ -> new Thread(() -> cellClicked(row, col)).start());
+      button.addActionListener(new GameCellListener(this, isFirstPlayer, row, col));
       opponentPanel.add(button);
     }
 
@@ -61,64 +56,43 @@ public class GameUI extends JFrame {
     setVisible(true);
   }
 
-  private void cellClicked(int row, int col) {
-    try (Socket socket = new Socket("localhost", 5000);
-        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-
-      out.writeObject(isFirstPlayer);
-      boolean isYourTurn = (Boolean) in.readObject();
-
-      if (isYourTurn) {
-        if (isFirstTurn && !isFirstPlayer) {
-          processOpponentMove(in);
-          isFirstTurn = false;
-        }
-
-        out.writeObject(new int[] {row, col});
-        int[][] result = (int[][]) in.readObject();
-
-        SwingUtilities.invokeLater(
-            () -> {
-              switch (result.length) {
-                case 0 -> {
-                  JOptionPane.showMessageDialog(this, "Miss!");
-                  opponentPanel.getComponent(row * gridSize + col).setBackground(Color.BLUE);
-                }
-                case 1 -> {
-                  JOptionPane.showMessageDialog(this, "Hit!");
-                  opponentPanel.getComponent(row * gridSize + col).setBackground(Color.RED);
-                }
-                default -> {
-                  JOptionPane.showMessageDialog(this, "You sunk a ship!");
-                  for (int[] pos : result)
-                    if (!(pos[0] == -1 && pos[1] == -1))
-                      opponentPanel
-                          .getComponent(pos[0] * gridSize + pos[1])
-                          .setBackground(Color.BLACK);
-
-                  if (result[0][0] == -1 && result[0][1] == -1) {
-                    JOptionPane.showMessageDialog(this, "You won!");
-                    for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
-                  }
-                }
-              }
-
-              opponentPanel.getComponent(row * gridSize + col).setEnabled(false);
-            });
-
-        processOpponentMove(in);
-      } else JOptionPane.showMessageDialog(this, "It's not your turn!");
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  @Override
+  public void showMessage(String message) {
+    JOptionPane.showMessageDialog(this, message);
   }
 
-  private void processOpponentMove(ObjectInputStream in)
-      throws IOException, ClassNotFoundException {
-    int[] opponentMove = (int[]) in.readObject();
-    int[][] opponentResult = (int[][]) in.readObject();
+  @Override
+  public void processPlayerMove(int row, int col, int[][] result) {
+    SwingUtilities.invokeLater(
+        () -> {
+          switch (result.length) {
+            case 0 -> {
+              JOptionPane.showMessageDialog(this, "Miss!");
+              opponentPanel.getComponent(row * gridSize + col).setBackground(Color.BLUE);
+            }
+            case 1 -> {
+              JOptionPane.showMessageDialog(this, "Hit!");
+              opponentPanel.getComponent(row * gridSize + col).setBackground(Color.RED);
+            }
+            default -> {
+              JOptionPane.showMessageDialog(this, "You sunk a ship!");
+              for (int[] pos : result)
+                if (!(pos[0] == -1 && pos[1] == -1))
+                  opponentPanel.getComponent(pos[0] * gridSize + pos[1]).setBackground(Color.BLACK);
 
+              if (result[0][0] == -1 && result[0][1] == -1) {
+                JOptionPane.showMessageDialog(this, "You won!");
+                for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
+              }
+            }
+          }
+
+          opponentPanel.getComponent(row * gridSize + col).setEnabled(false);
+        });
+  }
+
+  @Override
+  public void processOpponentMove(int[] opponentMove, int[][] opponentResult) {
     switch (opponentResult.length) {
       case 0 -> {
         JOptionPane.showMessageDialog(
