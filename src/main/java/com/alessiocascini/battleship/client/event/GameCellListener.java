@@ -36,18 +36,18 @@ public class GameCellListener implements ActionListener {
         if (isFirstTurn && !isFirstPlayer) {
           int[] opponentMove = (int[]) in.readObject();
           int[][] opponentResult = (int[][]) in.readObject();
-          handler.processOpponentMove(opponentMove, opponentResult);
+          handler.processMove(false, opponentMove[0], opponentMove[1], opponentResult);
 
           isFirstTurn = false;
         }
 
         out.writeObject(new int[] {row, col});
         int[][] result = (int[][]) in.readObject();
-        handler.processPlayerMove(row, col, result);
+        handler.processMove(true, row, col, result);
 
         int[] opponentMove = (int[]) in.readObject();
         int[][] opponentResult = (int[][]) in.readObject();
-        handler.processOpponentMove(opponentMove, opponentResult);
+        handler.processMove(false, opponentMove[0], opponentMove[1], opponentResult);
       } else handler.showMessage("It's not your turn!");
     } catch (Exception e) {
       handler.showMessage("Error communicating with server: " + e.getMessage());

@@ -39,22 +39,24 @@ public class GameHandler implements Runnable {
       if (result.length > 1) sunkenShipsCount[isPlayerOne ? 1 : 0]++;
 
       if (sunkenShipsCount[isPlayerOne ? 1 : 0] < Server.getShipCount()) out.writeObject(result);
-      else {
-        final int[][] message = new int[result.length + 1][];
-        message[0] = new int[] {-1, -1};
-        System.arraycopy(result, 0, message, 1, result.length);
-        out.writeObject(message);
-      }
+      else out.writeObject(createSunkMessage());
 
       isPlayerOneTurn = !isPlayerOneTurn;
 
       while (isPlayerOne != isPlayerOneTurn) Thread.sleep(100);
 
-      if (sunkenShipsCount[isPlayerOne ? 0 : 1] < Server.getShipCount()) out.writeObject(move);
-      else out.writeObject(new int[] {-1, -1});
-      out.writeObject(result);
+      out.writeObject(move);
+      if (sunkenShipsCount[isPlayerOne ? 0 : 1] < Server.getShipCount()) out.writeObject(result);
+      else out.writeObject(createSunkMessage());
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private int[][] createSunkMessage() {
+    final int[][] message = new int[result.length + 1][];
+    message[0] = new int[] {-1, -1};
+    System.arraycopy(result, 0, message, 1, result.length);
+    return message;
   }
 }

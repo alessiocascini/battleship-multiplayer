@@ -62,62 +62,29 @@ public class GameUI extends JFrame implements GameActionHandler {
   }
 
   @Override
-  public void processPlayerMove(int row, int col, int[][] result) {
-    SwingUtilities.invokeLater(
-        () -> {
-          switch (result.length) {
-            case 0 -> {
-              JOptionPane.showMessageDialog(this, "Miss!");
-              opponentPanel.getComponent(row * gridSize + col).setBackground(Color.BLUE);
-            }
-            case 1 -> {
-              JOptionPane.showMessageDialog(this, "Hit!");
-              opponentPanel.getComponent(row * gridSize + col).setBackground(Color.RED);
-            }
-            default -> {
-              JOptionPane.showMessageDialog(this, "You sunk a ship!");
-              for (int[] pos : result)
-                if (!(pos[0] == -1 && pos[1] == -1))
-                  opponentPanel.getComponent(pos[0] * gridSize + pos[1]).setBackground(Color.BLACK);
+  public void processMove(boolean isPlayerMove, int row, int col, int[][] result) {
+    if (result.length <= 1) {
+      JOptionPane.showMessageDialog(
+          this,
+          (isPlayerMove ? "You" : "Opponent") + (result.length == 0 ? " missed!" : " hit a ship!"));
+      (isPlayerMove ? opponentPanel : playerPanel)
+          .getComponent(row * gridSize + col)
+          .setBackground(result.length == 0 ? Color.BLUE : Color.RED);
+    } else {
+      JOptionPane.showMessageDialog(this, (isPlayerMove ? "You" : "Opponent") + " sunk a ship!");
 
-              if (result[0][0] == -1 && result[0][1] == -1) {
-                JOptionPane.showMessageDialog(this, "You won!");
-                for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
-              }
-            }
-          }
+      for (int[] pos : result)
+        if (pos[0] != -1 && pos[1] != -1)
+          (isPlayerMove ? opponentPanel : playerPanel)
+              .getComponent(pos[0] * gridSize + pos[1])
+              .setBackground(Color.BLACK);
 
-          opponentPanel.getComponent(row * gridSize + col).setEnabled(false);
-        });
-  }
-
-  @Override
-  public void processOpponentMove(int[] opponentMove, int[][] opponentResult) {
-    switch (opponentResult.length) {
-      case 0 -> {
-        JOptionPane.showMessageDialog(
-            this, "Opponent missed at (" + opponentMove[0] + ", " + opponentMove[1] + ")!");
-        playerPanel
-            .getComponent(opponentMove[0] * gridSize + opponentMove[1])
-            .setBackground(Color.BLUE);
-      }
-      case 1 -> {
-        JOptionPane.showMessageDialog(
-            this, "Opponent hit your ship at (" + opponentMove[0] + ", " + opponentMove[1] + ")!");
-        playerPanel
-            .getComponent(opponentMove[0] * gridSize + opponentMove[1])
-            .setBackground(Color.RED);
-      }
-      default -> {
-        JOptionPane.showMessageDialog(this, "Opponent sunk your ship!");
-        for (int[] pos : opponentResult)
-          playerPanel.getComponent(pos[0] * gridSize + pos[1]).setBackground(Color.BLACK);
-
-        if (opponentMove[0] == -1 && opponentMove[1] == -1) {
-          JOptionPane.showMessageDialog(this, "You lost!");
-          for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
-        }
+      if (result[0][0] == -1 && result[0][1] == -1) {
+        JOptionPane.showMessageDialog(this, (isPlayerMove ? "You" : "Opponent") + " won the game!");
+        for (Component comp : opponentPanel.getComponents()) comp.setEnabled(false);
       }
     }
+
+    if (isPlayerMove) opponentPanel.getComponent(row * gridSize + col).setEnabled(false);
   }
 }
