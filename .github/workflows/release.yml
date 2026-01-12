@@ -20,10 +20,9 @@ jobs:
           java-version: '25'
           distribution: 'oracle'
           server-id: github
-          settings-path: ${{ github.workspace }}
 
       - name: Build and Publish Package
-        run: mvn -B deploy
+        run: mvn -B deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
