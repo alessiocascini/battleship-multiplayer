@@ -58,8 +58,7 @@
                     <show>package</show>
                     <doclint>none</doclint>
                     <failOnError>false</failOnError>
-                    <reportOutputDirectory>${project.build.directory}/reports</reportOutputDirectory>
-                    <destDir>apidocs</destDir>
+                    <outputDirectory>${project.build.directory}/reports/apidocs</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>
