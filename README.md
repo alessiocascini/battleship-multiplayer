@@ -8,8 +8,8 @@
 
 > 📚 **Technical Documentation:** [View Javadoc Online](https://alessiocascini.github.io/battleship-multiplayer/)
 
-A Java-based multiplayer implementation of the classic **Battleship** game. This project features a robust *
-*Client-Server architecture** using Java Sockets for real-time communication and **Java Swing** for a responsive
+A Java-based multiplayer implementation of the classic **Battleship** game. This project features a robust
+**Client-Server architecture** using Java Sockets for real-time communication and **Java Swing** for a responsive
 graphical user interface.
 
 ## 🚀 Features
